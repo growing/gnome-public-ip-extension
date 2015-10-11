@@ -1,0 +1,56 @@
+GFile
+
+Soup get file
+
+gtk image set from file
+
+timers are in wrong item
+
+https://maps.googleapis.com/maps/api/staticmap?center=54.150000,-4.483300
+
+
+https://maps.googleapis.com/maps/api/staticmap?center=54.1500,-4.4833&size=150x150&zoom=13&scale=2
+
+https://maps.googleapis.com/maps/api/staticmap?center=54.1500,-4.4833&size=150x150&zoom=13&scale=2
+
+
+const Gtk = imports.gi.Gt
+
+Brooklyn+Bridge,New+York,NY&zoom=13&size=600x300&maptype=roadmap&markers=color:blue|label:S|40.702147,-74.015794&markers=color:green|label:G|40.711614,-74.012318&markers=color:red|label:C|40.718217,-73.998284
+
+
+{
+  "ip": "37.235.55.154",
+  "hostname": "154-55-235-37.static.edis.at",
+  "city": "Douglas",
+  "region": "",
+  "country": "IM",
+  "loc": "54.1500,-4.4833",
+  "org": "AS42455 Wi-Manx Limited"
+}
+
+{
+  "ip": "23.66.166.151",
+  "hostname": "a23-66-166-151.deploy.static.akamaitechnologies.com",
+  "city": "Cambridge",
+  "region": "Massachusetts",
+  "country": "US",
+  "loc": "42.3626,-71.0843",
+  "org": "AS16625 Akamai Technologies, Inc.",
+  "postal": "02142"
+}
+
+https://developer.gnome.org/Labels/
+
+
+notifications?
+
+
+g_type_init();
+SoupSession *session = soup_session_sync_new();
+SoupMessage *msg = soup_message_new ("GET", "http://mine.com/test.txt");
+soup_session_send_message (session, msg);
+fwrite (msg->response_body->data,
+        1,
+        msg->response_body->length,
+        stdout);

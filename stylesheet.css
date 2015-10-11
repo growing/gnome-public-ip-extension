@@ -9,5 +9,20 @@
 }
 
 .panel-status-menu-box {
-    padding-top: 4px;
+    padding-top: 5px;
+}
+
+.ip-info-key {
+    color: #838A85;
+}
+
+.ip-info-value {
+}
+
+.map-tile {
+    padding-right: 20px;
+}
+
+.ip-info-box {
+    padding-top: 5px;
 }

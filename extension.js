@@ -22,7 +22,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Soup = imports.gi.Soup;
 
-const EXAMPLE_ICON_SIZE = 16;
+const ICON_SIZE = 16;
 
 function _showPopup(label) {
 
@@ -80,31 +80,84 @@ function _getIP(callback) {
   });
 }
 
-const IPMenuItem = new Lang.Class({
-  Name: 'IPMenuItem',
-  Extends: PopupMenu.PopupBaseMenuItem,
+const DEFAULT_DATA = {
+  ip: "42.42.42.42",
+  hostname: "a23-66-166-151.deploy.static.akamaitechnologies.com",
+  city: "Cambridge",
+  region: "Massachusetts",
+  country: "US",
+  loc: "42.3626,-71.0843",
+  org: "AS16625 Akamai Technologies, Inc.",
+  postal: "02142"
+};
 
-  _init: function(info) {
-    this.parent();
-    this._info = info;
+const IPMenu = new Lang.Class({ //menu bar item
+  Name: 'IPMenu.IPMenu',
+  Extends: PanelMenu.Button,
+  _init: function() {
+    this.parent(0.0, _("Example"));
 
-    this._icon = new St.Icon({ gicon: info.icon,
-      icon_size: EXAMPLE_ICON_SIZE });
-    this.actor.add_child(this._icon);
+    let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
 
-    this._label = new St.Label({ text: info.name });
-    this.actor.add_child(this._label);
+    this._icon = new St.Icon({
+      gicon: Gio.icon_new_for_string(Me.path + '/icons/flags/GB.png'),
+      icon_size: ICON_SIZE
+    });
+
+    this._label = new St.Label({ text: DEFAULT_DATA.ip });
+
+    hbox.add_child(this._icon);
+    hbox.add_child(this._label);
+
+    this.actor.add_actor(hbox);
+
+    //main containers
+    let ipInfo = new PopupMenu.PopupBaseMenuItem({reactive: false});
+    let parentContainer = new St.BoxLayout(); //main container that holds ip info and map
+    //
+
+    //maptile
+    let mapInfo = new St.BoxLayout();
+    parentContainer.add_actor(mapInfo);
+
+    this._mapTile = new St.Icon({
+      style_class: 'map-tile',
+      gicon: Gio.icon_new_for_string(Me.path + '/icons/default_map.png'),
+      icon_size: 160
+    });
+
+    mapInfo.add_actor(this._mapTile);
+    //
+
+    //ipinfo
+    let ipInfoBox = new St.BoxLayout({ style_class: 'ip-info-box', vertical: true});
+    parentContainer.add_actor(ipInfoBox);
+    ipInfo.actor.add(parentContainer);
+    this.menu.addMenuItem(ipInfo);
+
+    Object.keys(DEFAULT_DATA).map(function(key){
+      if(key !== 'ip'){
+        let ipInfoRow = new St.BoxLayout();
+        ipInfoBox.add_actor(ipInfoRow);
+        this['_'+key] = DEFAULT_DATA[key];
+        ipInfoRow.add_actor(new St.Label({ style_class: 'ip-info-key', text: key + ': ' }));
+        ipInfoRow.add_actor(new St.Label({ style_class: 'ip-info-value', text: DEFAULT_DATA[key] }));
+      }
+    });
+    //
+
     this.update();
     this.start();
   },
 
   destroy: function() {
-    if (this._changedId) {
-      this._info.disconnect(this._changedId);
-      this._changedId = 0;
-    }
     this.stop();
     this.parent();
+  },
+
+  setLabel: function(ipData) {
+     this._label.text = ipData.ip;
+     this._icon.gicon = Gio.icon_new_for_string(Me.path + '/icons/flags/'+ipData.country+'.png');
   },
 
   start: function() {
@@ -123,64 +176,9 @@ const IPMenuItem = new Lang.Class({
   update: function() {
     _getIP(function(err, ipAddr){
       _getIPDetails(ipAddr, function(err,ipData){
-        setText(ipData.ip);
+        setLabel(ipData);
       });
     });
-
-    // this.parent(event);
-  },
-
-  _propertiesChanged: function(info) {
-    this._icon.gicon = info.icon;
-    this._label.text = info.name;
-  },
-});
-
-const SECTIONS = [
-  'one',
-  'two',
-  'three',
-  'four'
-]
-
-const IPMenu = new Lang.Class({
-  Name: 'IPMenu.IPMenu',
-  Extends: PanelMenu.Button,
-  _init: function() {
-    this.parent(0.0, _("Example"));
-
-    let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
-
-    this._label = new St.Label({ text: '42.42.42.42' });
-
-    hbox.add_child(this._label);
-
-    this.actor.add_actor(hbox);
-
-
-    this._sections = { };
-
-    for (let i=0; i < SECTIONS.length; i++) {
-      let id = SECTIONS[i];
-      this._sections[id] = new PopupMenu.PopupMenuSection();
-
-      this.menu.addMenuItem(this._sections[id]);
-
-      let menuItem = new IPMenuItem({name:SECTIONS[i], icon: new Gio.ThemedIcon({ name: 'drive-harddisk-symbolic' })});
-
-      this._sections[id].addMenuItem(menuItem);
-
-      this._sections[id].actor.visible = true;
-
-    }
-  },
-
-  destroy: function() {
-    this.parent();
-  },
-
-  setText: function(text) {
-     this._label.text = text;
   },
 
 });
@@ -203,6 +201,6 @@ function disable() {
   _indicator.destroy();
 }
 
-function setText(text) {
-  _indicator.setText(text);
+function setLabel(text) {
+  _indicator.setLabel(text);
 }
