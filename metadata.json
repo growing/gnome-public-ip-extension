@@ -1,0 +1,7 @@
+{
+  "shell-version": ["3.14.4"],
+  "uuid": "public-ip-extension@holdingitwrong.com",
+  "version": 18,
+  "name": "Public IP",
+  "description": "Public IP Address"
+}
