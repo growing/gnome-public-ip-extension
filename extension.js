@@ -7,6 +7,8 @@ const Lang = imports.lang;
 const Shell = imports.gi.Shell;
 const St = imports.gi.St;
 const Tweener = imports.ui.tweener;
+const Gtk = imports.gi.Gtk;
+const GtkClutter = imports.gi.GtkClutter;
 
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -26,7 +28,7 @@ const ICON_SIZE = 16;
 
 function _showPopup(label) {
 
-    text = new St.Label({ style_class: 'helloworld-label', text: label});
+    let text = new St.Label({ style_class: 'helloworld-label', text: label});
     Main.uiGroup.add_actor(text);
 
     text.opacity = 255;
@@ -63,6 +65,34 @@ function _getIPDetails(ipAddr, callback) {
   });
 }
 
+function _getGoogleMapTile(ipData, callback) {
+
+  const Gio = imports.gi.Gio;
+  const Soup = imports.gi.Soup;
+
+  // start an http session to make http requests
+  let _httpSession = new Soup.SessionAsync();
+  Soup.Session.prototype.add_feature.call(_httpSession, new Soup.ProxyResolverDefault());
+
+  // open the file
+  let file = Gio.file_new_for_path(Me.path + '/icons/latest_map.png');
+  let fstream = file.replace(null, false, Gio.FileCreateFlags.NONE, null);
+
+  // start the download
+  let request = Soup.Message.new('GET', 'https://maps.googleapis.com/maps/api/staticmap?center='+ipData.loc+'&size=150x150&zoom=13&scale=2');
+  request.connect('got_chunk', Lang.bind(this, function(message, chunk){
+    // write each chunk to file
+    fstream.write(chunk.get_data(), null, chunk.length);
+  }));
+
+  _httpSession.queue_message(request, function(_httpSession, message) {
+    // close the file
+    fstream.close(null);
+    callback(null);
+  });
+
+}
+
 function _getIP(callback) {
 
   let _httpSession = new Soup.SessionAsync();
@@ -81,14 +111,14 @@ function _getIP(callback) {
 }
 
 const DEFAULT_DATA = {
-  ip: "42.42.42.42",
-  hostname: "a23-66-166-151.deploy.static.akamaitechnologies.com",
-  city: "Cambridge",
-  region: "Massachusetts",
-  country: "US",
-  loc: "42.3626,-71.0843",
-  org: "AS16625 Akamai Technologies, Inc.",
-  postal: "02142"
+  ip: "No Connection",
+  hostname: "waiting for data",
+  city: "waiting for data",
+  region: "waiting for data",
+  country: "waiting for data",
+  loc: "waiting for data",
+  org: "waiting for data",
+  postal: "waiting for data"
 };
 
 const IPMenu = new Lang.Class({ //menu bar item
@@ -96,6 +126,7 @@ const IPMenu = new Lang.Class({ //menu bar item
   Extends: PanelMenu.Button,
   _init: function() {
     this.parent(0.0, _("Example"));
+    this._textureCache = St.TextureCache.get_default();
 
     let hbox = new St.BoxLayout({ style_class: 'panel-status-menu-box' });
 
@@ -104,7 +135,8 @@ const IPMenu = new Lang.Class({ //menu bar item
       icon_size: ICON_SIZE
     });
 
-    this._label = new St.Label({ text: DEFAULT_DATA.ip });
+    this._ipAddr = DEFAULT_DATA.ip;
+    this._label = new St.Label({ text: this._ipAddr });
 
     hbox.add_child(this._icon);
     hbox.add_child(this._label);
@@ -117,16 +149,16 @@ const IPMenu = new Lang.Class({ //menu bar item
     //
 
     //maptile
-    let mapInfo = new St.BoxLayout();
-    parentContainer.add_actor(mapInfo);
+    this._mapInfo = new St.BoxLayout();
+    parentContainer.add_actor(this._mapInfo);
 
+    //default map tile
     this._mapTile = new St.Icon({
-      style_class: 'map-tile',
       gicon: Gio.icon_new_for_string(Me.path + '/icons/default_map.png'),
       icon_size: 160
     });
 
-    mapInfo.add_actor(this._mapTile);
+    this._mapInfo.add_actor(this._mapTile);
     //
 
     //ipinfo
@@ -139,9 +171,9 @@ const IPMenu = new Lang.Class({ //menu bar item
       if(key !== 'ip'){
         let ipInfoRow = new St.BoxLayout();
         ipInfoBox.add_actor(ipInfoRow);
-        this['_'+key] = DEFAULT_DATA[key];
         ipInfoRow.add_actor(new St.Label({ style_class: 'ip-info-key', text: key + ': ' }));
-        ipInfoRow.add_actor(new St.Label({ style_class: 'ip-info-value', text: DEFAULT_DATA[key] }));
+        this['_'+key] = new St.Label({ style_class: 'ip-info-value', text: DEFAULT_DATA[key] });
+        ipInfoRow.add_actor(this['_'+key]);
       }
     });
     //
@@ -153,11 +185,6 @@ const IPMenu = new Lang.Class({ //menu bar item
   destroy: function() {
     this.stop();
     this.parent();
-  },
-
-  setLabel: function(ipData) {
-     this._label.text = ipData.ip;
-     this._icon.gicon = Gio.icon_new_for_string(Me.path + '/icons/flags/'+ipData.country+'.png');
   },
 
   start: function() {
@@ -173,11 +200,42 @@ const IPMenu = new Lang.Class({ //menu bar item
     }
   },
 
+  updateMapTile: function() {
+    let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+
+    this._mapInfo.destroy_all_children();
+
+    this._mapInfo.add_child(
+      this._textureCache.load_uri_async(
+      Gio.file_new_for_path(Me.path + '/icons/latest_map.png').get_uri(),
+      -1, 160, scaleFactor));
+  },
+
   update: function() {
+
+    let self = this;
+
     _getIP(function(err, ipAddr){
-      _getIPDetails(ipAddr, function(err,ipData){
-        setLabel(ipData);
-      });
+      if(ipAddr && (self.ipAddr !== ipAddr)){ //we have an IP, and it's different to before
+        self.ipAddr = ipAddr; //changed public IP
+        _getIPDetails(ipAddr, function(err,ipData){
+          if(ipData){
+            self._label.text = ipData.ip;
+
+            Object.keys(ipData).map(function(key){
+              if(key && key !== 'ip'){
+                this['_'+key].text = ipData[key];
+              }
+            });
+
+            self._icon.gicon = Gio.icon_new_for_string(Me.path + '/icons/flags/'+ipData.country+'.png');
+
+            _getGoogleMapTile(ipData, function(err){
+              self.updateMapTile();
+            });
+          }
+        });
+      }
     });
   },
 
@@ -199,8 +257,4 @@ function enable() {
 
 function disable() {
   _indicator.destroy();
-}
-
-function setLabel(text) {
-  _indicator.setLabel(text);
 }
