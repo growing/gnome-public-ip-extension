@@ -215,7 +215,7 @@ const IPMenu = new Lang.Class({ //menu bar item
         -1, 160, scaleFactor));
     } else {
       this._mapInfo.add_child(
-        this._textureCache.load_url_async(
+        this._textureCache.load_file_async(
         Gio.file_new_for_path(Me.path + '/icons/latest_map.png'),
         -1, 160, scaleFactor));
     }
