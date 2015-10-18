@@ -1,7 +1,8 @@
 {
   "shell-version": ["3.14","3.16"],
-  "uuid": "public-ip-extension@holdingitwrong.com",
+  "uuid": "public-ip-address@holdingitwrong.com",
   "version": 18,
-  "name": "Public IP",
-  "description": "Public IP Address"
+  "name": "Public IP Address",
+  "description": "Extension tha shows details about your public IP address",
+  "settings-schema": "org.gnome.shell.extensions.public-ip-address"
 }

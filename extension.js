@@ -25,7 +25,13 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 const Soup = imports.gi.Soup;
 
+const Metadata = Me.metadata;
+
 const ICON_SIZE = 16;
+
+const SETTINGS_COMPACT_MODE = 'compact-mode';
+const SETTINGS_REFRESH_RATE = 'refresh-rate';
+const SETTINGS_POSITION = 'position-in-panel';
 
 function _showPopup(label) {
 
@@ -132,6 +138,11 @@ const IPMenu = new Lang.Class({ //menu bar item
     this.parent(0.0, _('Example'));
     this._textureCache = St.TextureCache.get_default();
 
+    let schema = Me.metadata['settings-schema'];
+    this._settings = new Gio.Settings({schema_id: schema});
+
+    this.setPrefs();
+
     let hbox = new St.BoxLayout({style_class: 'panel-status-menu-box'});
 
     this._icon = new St.Icon({
@@ -140,12 +151,15 @@ const IPMenu = new Lang.Class({ //menu bar item
     });
 
     this._ipAddr = DEFAULT_DATA.ip;
-    this._label = new St.Label({text: this._ipAddr});
+
+    this._label = new St.Label({
+      text: this._compactMode ? '' : this._ipAddr
+    });
 
     hbox.add_child(this._icon);
     hbox.add_child(this._label);
 
-    this.actor.add_actor(hbox);
+    this._actor = this.actor.add_actor(hbox);
 
     //main containers
     let ipInfo = new PopupMenu.PopupBaseMenuItem({reactive: false});
@@ -181,8 +195,39 @@ const IPMenu = new Lang.Class({ //menu bar item
       }
     });
 
+    let _appSys = Shell.AppSystem.get_default();
+    let _gsmPrefs = _appSys.lookup_app('gnome-shell-extension-prefs.desktop');
+
+    let prefs;
+
+    prefs = new PopupMenu.PopupMenuItem(_("Preferences..."));
+
+    prefs.connect('activate', function() {
+      if (_gsmPrefs.get_state() == _gsmPrefs.SHELL_APP_STATE_RUNNING) {
+        _gsmPrefs.activate();
+      } else {
+        let info = _gsmPrefs.get_app_info();
+        let timestamp = global.display.get_current_time_roundtrip();
+        info.launch_uris([Metadata.uuid], global.create_app_launch_context(timestamp, -1));
+      }
+    });
+
+    this.menu.addMenuItem(prefs);
+
+    this._settings.connect('changed', Lang.bind(this, function() {
+      log('settings changed');
+      this.setPrefs();
+      this.stop();
+      this.start(this._refreshRate); //restarts incase refresh rate was updated
+      this.resetPanelPos();
+      this.update();
+    }));
+
+
+    Main.panel.addToStatusArea('ip-menu', this, 1, this._menuPosition);
+
     this.update();
-    this.start();
+    this.start(this._refreshRate);
   },
 
   destroy: function() {
@@ -190,8 +235,8 @@ const IPMenu = new Lang.Class({ //menu bar item
     this.parent();
   },
 
-  start: function() {
-    this.timer = Mainloop.timeout_add_seconds(30, Lang.bind(this, function() {
+  start: function(timeout) {
+    this.timer = Mainloop.timeout_add_seconds(timeout, Lang.bind(this, function() {
       this.update();
       return true;
     }));
@@ -222,16 +267,36 @@ const IPMenu = new Lang.Class({ //menu bar item
 
   },
 
+  resetPanelPos: function() {
+
+    Main.panel.statusArea['ip-menu'] = null;
+    Main.panel.addToStatusArea('ip-menu', this, 1, this._menuPosition);
+
+  },
+
+  setPrefs: function() {
+    this._prevCompactMode = this._compactMode;
+    this._prevRefreshRate = this._refreshRate;
+    this._prevMenuPosition = this._menuPosition;
+
+    this._compactMode = this._settings.get_boolean(SETTINGS_COMPACT_MODE);
+    this._refreshRate = this._settings.get_int(SETTINGS_REFRESH_RATE);
+    this._menuPosition = this._settings.get_string(SETTINGS_POSITION);
+  },
+
   update: function() {
 
     let self = this;
 
     _getIP(function(err, ipAddr) {
+
+      self._label.text = self._compactMode ? '' : ipAddr; //removes text if it's toggled
+
       if (ipAddr && (self.ipAddr !== ipAddr)) { //we have an IP, and it's different to before
         self.ipAddr = ipAddr; //changed public IP
         _getIPDetails(ipAddr, function(err, ipData) {
           if (ipData) {
-            self._label.text = ipData.ip;
+            self._label.text = self._compactMode ? '' : ipData.ip;
 
             Object.keys(ipData).map(function(key) {
               if (key && key !== 'ip') {
@@ -260,10 +325,6 @@ let _indicator;
 
 function enable() {
   _indicator = new IPMenu();
-
-  let pos = 1; //controls the horizontal position; 1 = 1st left, 2 = 2nd left etc
-
-  Main.panel.addToStatusArea('ip-menu', _indicator, pos, 'right');
 }
 
 function disable() {

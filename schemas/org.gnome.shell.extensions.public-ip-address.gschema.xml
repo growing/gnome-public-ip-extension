@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="public-ip-address">
+  <enum id="org.gnome.shell.extensions.public-ip-address.position">
+    <value value="0" nick="left"/>
+    <value value="1" nick="center"/>
+    <value value="2" nick="right"/>
+  </enum>
+  <schema path="/org/gnome/shell/extensions/public-ip-address/" id="org.gnome.shell.extensions.public-ip-address">
+    <key type="i" name="refresh-rate">
+      <default>30</default>
+      <summary>Check every x seconds</summary>
+    </key>
+    <key type="b" name="compact-mode">
+      <default>false</default>
+      <summary>Only show flag in toolbar</summary>
+    </key>
+    <key name="position-in-panel" enum="org.gnome.shell.extensions.public-ip-address.position">
+      <default>'right'</default>
+      <summary>Position in Panel</summary>
+    </key>
+  </schema>
+</schemalist>
