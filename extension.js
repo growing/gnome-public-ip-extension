@@ -33,27 +33,6 @@ const SETTINGS_COMPACT_MODE = 'compact-mode';
 const SETTINGS_REFRESH_RATE = 'refresh-rate';
 const SETTINGS_POSITION = 'position-in-panel';
 
-function _showPopup(label) {
-
-  let text = new St.Label({style_class: 'helloworld-label', text: label});
-  Main.uiGroup.add_actor(text);
-
-  text.opacity = 255;
-
-  let monitor = Main.layoutManager.primaryMonitor;
-
-  text.set_position(monitor.x + Math.floor(monitor.width / 2 - text.width / 2),
-                    monitor.y + Math.floor(monitor.height / 2 - text.height / 2));
-
-  Tweener.addTween(text,
-                   {opacity: 0,
-                     time: 2,
-                     transition: 'easeOutQuad',
-                     onComplete: function() {
-                       Main.uiGroup.remove_actor(text);
-                     }});
-}
-
 function _getIPDetails(ipAddr, callback) {
 
   let _httpSession = new Soup.SessionAsync();
@@ -213,7 +192,6 @@ const IPMenu = new Lang.Class({ //menu bar item
     this.menu.addMenuItem(prefs);
 
     this._settings.connect('changed', Lang.bind(this, function() {
-      log('settings changed');
       this.setPrefs();
       this.stop();
       this.start(this._refreshRate); //restarts incase refresh rate was updated
