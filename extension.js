@@ -122,13 +122,13 @@ function _getIP(callback) {
 
 const DEFAULT_DATA = {
   ip: 'No Connection',
-  hostname: 'waiting for data',
-  city: 'waiting for data',
-  region: 'waiting for data',
-  country: 'waiting for data',
-  loc: 'waiting for data',
-  org: 'waiting for data',
-  postal: 'waiting for data',
+  hostname: '',
+  city: '',
+  region: '',
+  country: '',
+  loc: '',
+  org: '',
+  postal: '',
 };
 
 const IPMenu = new Lang.Class({ //menu bar item
@@ -186,13 +186,11 @@ const IPMenu = new Lang.Class({ //menu bar item
     this.menu.addMenuItem(ipInfo);
 
     Object.keys(DEFAULT_DATA).map(function(key) {
-      if (key !== 'ip') {
-        let ipInfoRow = new St.BoxLayout();
-        ipInfoBox.add_actor(ipInfoRow);
-        ipInfoRow.add_actor(new St.Label({style_class: 'ip-info-key', text: key + ': '}));
-        this['_' + key] = new St.Label({style_class: 'ip-info-value', text: DEFAULT_DATA[key]});
-        ipInfoRow.add_actor(this['_' + key]);
-      }
+      let ipInfoRow = new St.BoxLayout();
+      ipInfoBox.add_actor(ipInfoRow);
+      ipInfoRow.add_actor(new St.Label({style_class: 'ip-info-key', text: key + ': '}));
+      this['_' + key] = new St.Label({style_class: 'ip-info-value', text: DEFAULT_DATA[key]});
+      ipInfoRow.add_actor(this['_' + key]);
     });
 
     let _appSys = Shell.AppSystem.get_default();

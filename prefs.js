@@ -68,7 +68,7 @@ const IPMenuSettingsWidget = new GObject.Class({
 
     //
     let frequencyContainer = new Gtk.HBox({spacing: 5});
-    let frequencyLabel = new Gtk.Label({label: _('How often to check for IP change')});
+    let frequencyLabel = new Gtk.Label({label: _('How often to check for IP change (secs)')});
     let frequencySelector = new Gtk.SpinButton();
 
     frequencyContainer.pack_start(frequencyLabel, 0,0,0);
