@@ -5,7 +5,7 @@ This Gnome extension displays information about your public IP address (hostname
 
 Note: the ip data is not retrieved using HTTPS (because that requires a paid account with ipinfo.io), so if you're hiding from the NSA, I wouldn't rely on this extension to determine whether or not you are connected to a VPN.
 
-Icons courtesy of gosquared.com
+Icons courtesy of http://gosquared.com
 
 IP Data courtesy of from http://ipinfo.io/ and http://icanhazip.com
 
