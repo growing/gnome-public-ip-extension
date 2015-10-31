@@ -114,7 +114,7 @@ const IPMenu = new Lang.Class({ //menu bar item
   Name: 'IPMenu.IPMenu',
   Extends: PanelMenu.Button,
   _init: function() {
-    this.parent(0.0, _('Example'));
+    this.parent(0.0, _('IP Details'));
     this._textureCache = St.TextureCache.get_default();
 
     let schema = Me.metadata['settings-schema'];
@@ -125,7 +125,7 @@ const IPMenu = new Lang.Class({ //menu bar item
     let hbox = new St.BoxLayout({style_class: 'panel-status-menu-box'});
 
     this._icon = new St.Icon({
-      gicon: Gio.icon_new_for_string(Me.path + '/icons/flags/GB.png'),
+      gicon: Gio.icon_new_for_string(Me.path + '/icons/flags/US.png'),
       icon_size: ICON_SIZE
     });
 
@@ -275,9 +275,7 @@ const IPMenu = new Lang.Class({ //menu bar item
             self._label.text = self._compactMode ? '' : ipData.ip;
 
             Object.keys(ipData).map(function(key) {
-              if (key && key !== 'ip') {
-                this['_' + key].text = ipData[key];
-              }
+              this['_' + key].text = ipData[key];
             });
 
             self._icon.gicon = Gio.icon_new_for_string(Me.path + '/icons/flags/' + ipData.country + '.png');

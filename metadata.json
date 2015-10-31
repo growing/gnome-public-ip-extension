@@ -3,6 +3,7 @@
   "uuid": "public-ip-address@holdingitwrong.com",
   "version": 18,
   "name": "Public IP Address",
-  "description": "Extension tha shows details about your public IP address",
-  "settings-schema": "org.gnome.shell.extensions.public-ip-address"
+  "description": "Displays information about your public IP address (hostname, country, AS block etc) and a map image of the IP's geolocation",
+  "settings-schema": "org.gnome.shell.extensions.public-ip-address",
+  "url": "https://github.com/growing/gnome-public-ip-extension"
 }
