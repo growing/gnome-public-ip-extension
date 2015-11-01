@@ -1,5 +1,5 @@
 {
-  "shell-version": ["3.14","3.16"],
+  "shell-version": ["3.14","3.16","3.18"],
   "uuid": "public-ip-address@holdingitwrong.com",
   "version": 18,
   "name": "Public IP Address",
