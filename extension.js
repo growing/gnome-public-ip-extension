@@ -117,8 +117,7 @@ const IPMenu = new Lang.Class({ //menu bar item
     this.parent(0.0, _('IP Details'));
     this._textureCache = St.TextureCache.get_default();
 
-    let schema = Me.metadata['settings-schema'];
-    this._settings = new Gio.Settings({schema_id: schema});
+    this._settings = Convenience.getSettings(Me.metadata['settings-schema']);
 
     this.setPrefs();
 

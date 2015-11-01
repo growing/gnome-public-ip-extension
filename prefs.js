@@ -7,6 +7,7 @@ const Lang = imports.lang;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
 
 const Gettext = imports.gettext.domain('gnome-shell-extensions');
 const _ = Gettext.gettext;
@@ -27,9 +28,7 @@ const IPMenuSettingsWidget = new GObject.Class({
 
     this.orientation = Gtk.Orientation.VERTICAL;
 
-    let schema = Me.metadata['settings-schema'];
-
-    this._settings = new Gio.Settings({schema_id: schema});
+    this._settings = Convenience.getSettings(Me.metadata['settings-schema']);
 
     let vbox = new Gtk.VBox();
     this.add(vbox);
