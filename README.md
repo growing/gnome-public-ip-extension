@@ -11,4 +11,4 @@ IP Data courtesy of from http://ipinfo.io/ and http://icanhazip.com
 
 Map image courtesy of Google Maps.
 
-![screenshot](https://raw.githubusercontent.com/growing/file-dump/master/public_ip_screenshot.png)
+![screenshot](https://raw.githubusercontent.com/growing/files/master/screenshot.png)
