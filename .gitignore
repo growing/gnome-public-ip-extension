@@ -1,2 +1,4 @@
-icons/.*
-icons/latest_map.png
+public-ip-address@holdingitwrong.com/icons/.*
+public-ip-address@holdingitwrong.com/icons/latest_map.png
+build/
+build/*
