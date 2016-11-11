@@ -1,5 +1,4 @@
-
-##Public IP Address Gnome Extension
+# Public IP Address Gnome Extension
 
 This Gnome extension displays information about your public IP address (hostname, country, AS block etc) and a map image of the IP's geolocation. Useful if you use a VPN, or enjoy nerding out over where your internet traffic is traveling through.
 
@@ -12,3 +11,11 @@ IP Data courtesy of from http://ipinfo.io/ and http://icanhazip.com
 Map image courtesy of Google Maps.
 
 ![screenshot](https://raw.githubusercontent.com/growing/files/master/screenshot.png)
+
+## Installation
+
+Download an archive or use git to clone the project, then, from the *gnome-public-ip-extension* directory, just do:
+
+```sh
+make
+```
